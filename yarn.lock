@@ -4110,6 +4110,26 @@
     "@typescript-eslint/types" "5.56.0"
     eslint-visitor-keys "^3.3.0"
 
+"@untemps/react-vocal@^1.7.16":
+  version "1.7.16"
+  resolved "https://registry.yarnpkg.com/@untemps/react-vocal/-/react-vocal-1.7.16.tgz#85d14f988f15b91845e4045f9c4ce41698b53350"
+  integrity sha512-qZ/ODx2UXtp/BvcEUkHyH7Ae9gZNJEU4WkN6c+qmH61b58ioqJrxs217fn4sf1ylzB3GEeIyoWB4iJ3RsoaUhQ==
+  dependencies:
+    "@untemps/vocal" "^1.3.0"
+    fuse.js "^6.4.6"
+
+"@untemps/user-permissions-utils@^1.1.0":
+  version "1.1.17"
+  resolved "https://registry.yarnpkg.com/@untemps/user-permissions-utils/-/user-permissions-utils-1.1.17.tgz#10d624aa915c91a77de4589c1347e6832a820c7d"
+  integrity sha512-E08Ge2/yD04souH2RH8YxPYhwq8xTbeDyD+xF3Vzc+jmrEZckmvA4GwSNnvu9EV5EJhaiLXVzxRNvJzQ4oEE9Q==
+
+"@untemps/vocal@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@untemps/vocal/-/vocal-1.3.0.tgz#85877e7ff00bb88591586383c56c4ea15871ea1c"
+  integrity sha512-i4GyGM1WL41XpnEidURVcBbu+jJLWsi7JMUzpS3XjPqFHAaK1nm4GP9ZwCEGrfIYDEMM65a62kNNxxi7Vmpm3Q==
+  dependencies:
+    "@untemps/user-permissions-utils" "^1.1.0"
+
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.1.tgz#2bfd767eae1a6996f432ff7e8d7fc75679c0b6a7"
@@ -7063,6 +7083,11 @@ functions-have-names@^1.2.2:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
+
+fuse.js@^6.4.6:
+  version "6.6.2"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-6.6.2.tgz#fe463fed4b98c0226ac3da2856a415576dc9a111"
+  integrity sha512-cJaJkxCCxC8qIIcPBF9yGxY0W/tVZS3uEISDxhYIdtk8OL93pe+6Zj7LjCqVV4dzbqcriOZ+kQ/NE4RXZHsIGA==
 
 gauge@^3.0.0:
   version "3.0.2"

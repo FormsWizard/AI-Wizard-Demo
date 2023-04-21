@@ -20,6 +20,8 @@ import { DraggableComponent } from '../wizard/WizardSlice'
 import Box from '@mui/material/Box'
 import {LoadingButton, TabContext, TabList, TabPanel} from '@mui/lab'
 import DropTargetFormsPreview from '../dragAndDrop/DropTargetFormsPreview'
+import Vocal from '@untemps/react-vocal'
+
 
 interface ConfirmModalProps {
   onConfirm?: () => void
@@ -54,6 +56,9 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(
     const dispatch = useAppDispatch()
     const [activeTab, setActiveTab] = useState('2')
     const [loading, setLoading] = useState(false);
+    const onVocalResult = useCallback( (result) => {
+      setMessage(msg => `${msg} ${result}`)
+    }, [setMessage])
 
     useEffect(() => {
       try {
@@ -142,7 +147,13 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(
         </DialogTitle>
         <DialogContent>
           <Grid container direction={'column'}>
-            <TextField multiline fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
+            <Grid item>
+              <TextField multiline fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
+              <Vocal
+                  onResult={onVocalResult}
+                  style={{ width: 16, position: 'absolute', right: 10, top: -2 }}
+              />
+            </Grid>
             <LoadingButton loading={loading} onClick={onSubmit}>Submit</LoadingButton>
             <TabContext value={activeTab}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
