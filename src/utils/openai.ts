@@ -1,8 +1,8 @@
 import { Configuration, OpenAIApi } from 'openai'
-
+console.log(process.env)
 const configuration = new Configuration({
-  organization: '',
-  apiKey: '',
+  organization: process.env.REACT_APP_OPENAI_ORGANIZATION,
+  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
 })
 const openaiInstance = new OpenAIApi(configuration)
 
