@@ -9,7 +9,10 @@ import { DraggableComponent } from '../wizard/WizardSlice'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Tab } from '@mui/material'
 import { useCallback } from 'react'
-import {updateScopeOfUISchemaElement} from "../../utils/uiSchemaHelpers";
+import { updateScopeOfUISchemaElement } from '../../utils/uiSchemaHelpers'
+import { ConfirmButton } from '../modals/ChatGptModal'
+import { useSelector } from 'react-redux'
+import { selectTemplates } from '../wizard/TemplateSlice'
 
 const drawerWidth = 240
 
@@ -115,6 +118,7 @@ export const advancedDraggableComponents: DraggableComponent[] = [
 
 export default function LeftDrawer() {
   const [activeTab, setActiveTab] = React.useState('1')
+  const templates = useSelector(selectTemplates)
   const handleChange = useCallback(
     (event, newValue) => {
       setActiveTab(newValue)
@@ -159,6 +163,10 @@ export default function LeftDrawer() {
         </TabPanel>
         <TabPanel value="2" sx={{ p: 0 }}>
           {advancedDraggableComponents.map((component, index) => {
+            return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
+          })}
+          <ConfirmButton>Chat GPT</ConfirmButton>
+          {templates.map((component, index) => {
             return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
           })}
         </TabPanel>
