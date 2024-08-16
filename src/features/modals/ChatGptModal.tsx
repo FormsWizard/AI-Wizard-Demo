@@ -21,6 +21,7 @@ import Box from '@mui/material/Box'
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
 import DropTargetFormsPreview from '../dragAndDrop/DropTargetFormsPreview'
 import Vocal from '@untemps/react-vocal'
+import { AndroidRounded } from '@mui/icons-material'
 
 interface ConfirmModalProps {
   onConfirm?: () => void
@@ -76,20 +77,41 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
   const talkToAI = useCallback(
     async (text) => {
       // Insert message at first element.
-      const response = await openaiInstance.createCompletion({
+      const response = await openaiInstance.chat.completions.create({
         model: model,
-        prompt: `For a form generate a JSONSchema that meets the following requirements: ${text}`,
-        max_tokens: 600,
+        messages: [
+          {
+            role: 'user',
+            content: `For a form generate a JSONSchema that meets the following requirements: ${text} \n Only output the parsable JSON Schema - even without the typical markdown code block. Keys und properties should always be in english but labels/titles should be in the language of the requirements text. Add additional fields, that can be derived from your domain knowledge, even if not explicitly asked for.`,
+          },
+        ],
+        max_tokens: 4000,
       })
-      console.log(response.data)
+      console.log(response)
       // Append AI message.
-      setResponse(response.data.choices[0].text)
-      const titleResponse = await openaiInstance.createCompletion({
-        model: model,
-        prompt: `The headline or title that summarizes the following form: ${text}`,
-        max_tokens: 50,
-      })
-      setFormTitle(titleResponse.data.choices[0].text)
+      const res = response.choices[0].message.content
+      setResponse(res)
+      let formTitle: string | null = null
+      try {
+        const schema = JSON.parse(res)
+        if (typeof schema.title === 'string') {
+          formTitle = schema.title
+        }
+      } catch (e) {
+        console.warn(e.message)
+      }
+      if (!formTitle) {
+        const titleResponse = await openaiInstance.chat.completions.create({
+          model: model,
+          messages: [
+            { role: 'user', content: `A short headline or title that summarizes the following form: ${text}` },
+          ],
+          max_tokens: 50,
+        })
+        formTitle = titleResponse.choices[0].message.content
+      }
+
+      setFormTitle(formTitle)
       setLoading(false)
     },
     [setResponse, setFormTitle, setLoading]
@@ -143,7 +165,11 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
         <Grid container direction={'column'}>
           <Grid item>
             <TextField multiline fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
-            <Vocal onResult={onVocalResult} style={{ width: 16, position: 'absolute', right: 10, top: -2 }} />
+            <Vocal
+              lang={'de-DE'}
+              onResult={onVocalResult}
+              style={{ width: 16, position: 'absolute', right: 10, top: -2 }}
+            />
           </Grid>
           <LoadingButton loading={loading} onClick={onSubmit}>
             Submit
@@ -171,6 +197,9 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
         </Grid>
       </DialogContent>
       <DialogActions>
+        <Button onClick={handleAgree} color="primary">
+          <FormattedMessage description="confirm modal header" defaultMessage="agree" id="agree"></FormattedMessage>
+        </Button>
         <Button onClick={handleDisagree} color="primary">
           <FormattedMessage description="confirm modal header" defaultMessage="cancel" id="cancel"></FormattedMessage>
         </Button>
@@ -187,6 +216,8 @@ export function ConfirmButton({
 }: ConfirmModalProps & { children: React.ReactNode }) {
   return (
     <Button
+      startIcon={<AndroidRounded />}
+      variant={'contained'}
       onClick={() =>
         NiceModal.show(ChatGptModal, {
           onConfirm,

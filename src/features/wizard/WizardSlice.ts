@@ -32,45 +32,6 @@ const initialState: JsonFormsEditState = {
       name: {
         type: 'string',
       },
-      description: {
-        type: 'string',
-      },
-      done: {
-        type: 'boolean',
-      },
-      rating: {
-        type: 'integer',
-      },
-      customerSatisfaction: {
-        type: 'integer',
-      },
-      category: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-          },
-          description: {
-            type: 'string',
-          },
-        },
-      },
-      meta: {
-        type: 'object',
-        properties: {
-          created: {
-            type: 'string',
-            format: 'date-time',
-          },
-          lastModified: {
-            type: 'string',
-            format: 'date-time',
-          },
-          version: {
-            type: 'integer',
-          },
-        },
-      },
     },
     required: ['name'],
   },
@@ -80,58 +41,6 @@ const initialState: JsonFormsEditState = {
       {
         type: 'Control',
         scope: '#/properties/name',
-      },
-      {
-        type: 'HorizontalLayout',
-        elements: [
-          {
-            type: 'Control',
-            scope: '#/properties/rating',
-          },
-          {
-            type: 'Control',
-            scope: '#/properties/customerSatisfaction',
-          },
-        ],
-      },
-      {
-        type: 'Control',
-        scope: '#/properties/category/properties/name',
-      },
-      {
-        type: 'Control',
-        scope: '#/properties/category/properties/description',
-      },
-      {
-        type: 'Control',
-        scope: '#/properties/description',
-      },
-      {
-        type: 'Control',
-        scope: '#/properties/done',
-      },
-      {
-        type: 'Group',
-        label: 'Metadata',
-        elements: [
-          {
-            type: 'VerticalLayout',
-            elements: [
-              {
-                type: 'Control',
-                scope: '#/properties/meta/properties/created',
-              },
-              {
-                type: 'Control',
-                scope: '#/properties/meta/properties/lastModified',
-              },
-              {
-                type: 'Control',
-                scope: '#/properties/meta/properties/version',
-              },
-            ],
-          },
-        ],
       },
     ],
   },
@@ -237,6 +146,11 @@ export const jsonFormsEditSlice = createSlice({
       const { scope, uiSchema } = action.payload
       state.uiSchema = updateUISchemaElement(scope, uiSchema, state.uiSchema)
     },
+    replaceSchema: (state: JsonFormsEditState, action: PayloadAction<JsonSchema>) => {
+      const schema = action.payload
+      state.jsonSchema = schema
+      state.uiSchema = undefined
+    },
     insertControl: (
       state: JsonFormsEditState,
       action: PayloadAction<{
@@ -303,7 +217,14 @@ export const jsonFormsEditSlice = createSlice({
   },
 })
 
-export const { insertControl, selectElement, renameField, removeField, updateUISchemaByScope, toggleEditMode } =
-  jsonFormsEditSlice.actions
+export const {
+  insertControl,
+  selectElement,
+  renameField,
+  removeField,
+  updateUISchemaByScope,
+  toggleEditMode,
+  replaceSchema,
+} = jsonFormsEditSlice.actions
 
 export default jsonFormsEditSlice.reducer

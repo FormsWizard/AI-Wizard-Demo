@@ -26,7 +26,7 @@
     "@untemps/react-vocal": "^1.7.16",
     "ajv": "^8.12.0",
     "lodash": "^4.17.21",
-    "openai": "^3.2.1",
+    "openai": "^4.55.7",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
@@ -37,7 +37,9 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.9.0",
     "react-scripts": "5.0.1",
+    "redux-persist": "^6.0.0",
     "typescript": "^4.9.5",
+    "uuidv4": "^6.2.13",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

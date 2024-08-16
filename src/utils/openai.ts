@@ -1,11 +1,11 @@
-import { Configuration, OpenAIApi } from 'openai'
+import { OpenAI } from 'openai'
 console.log(process.env)
-const configuration = new Configuration({
+const openAIInstance = new OpenAI({
+  dangerouslyAllowBrowser: true,
   organization: process.env.REACT_APP_OPENAI_ORGANIZATION,
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,
 })
-const openaiInstance = new OpenAIApi(configuration)
 
-export default openaiInstance
+export default openAIInstance
 
-export const model = 'text-davinci-003'
+export const model = 'gpt-4o'

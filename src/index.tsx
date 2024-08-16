@@ -1,7 +1,7 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { store } from './app/store'
+import { persistor, store } from './app/store'
 import App from './App'
 import { HashRouter } from 'react-router-dom'
 import './index.css'
@@ -13,6 +13,7 @@ import NiceModal from '@ebay/nice-modal-react'
 import { IntlProvider } from 'react-intl'
 import { TouchBackend } from 'react-dnd-touch-backend'
 import reportWebVitals from './reportWebVitals'
+import { PersistGate } from 'redux-persist/integration/react'
 const container = document.getElementById('root')!
 const root = createRoot(container)
 console.log('APP running in touch mode: ' + isTouchDevice())
@@ -20,17 +21,19 @@ const backend = isTouchDevice() ? TouchBackend : HTML5Backend
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <DndProvider backend={backend}>
-          <IntlProvider messages={{}} locale="de" defaultLocale="en">
-            <NiceModal.Provider>
-              <HashRouter>
-                <App />
-              </HashRouter>
-            </NiceModal.Provider>
-          </IntlProvider>
-        </DndProvider>
-      </ThemeProvider>
+      <PersistGate persistor={persistor} loading={null}>
+        <ThemeProvider theme={theme}>
+          <DndProvider backend={backend}>
+            <IntlProvider messages={{}} locale="de" defaultLocale="en">
+              <NiceModal.Provider>
+                <HashRouter>
+                  <App />
+                </HashRouter>
+              </NiceModal.Provider>
+            </IntlProvider>
+          </DndProvider>
+        </ThemeProvider>
+      </PersistGate>
     </Provider>
   </React.StrictMode>
 )

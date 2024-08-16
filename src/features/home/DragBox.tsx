@@ -1,7 +1,8 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { useDrag } from 'react-dnd'
 import { Button, Card, CardActionArea, CardActions, CardContent, Typography } from '@mui/material'
-import { DraggableComponent } from '../wizard/WizardSlice'
+import { DraggableComponent, replaceSchema } from '../wizard/WizardSlice'
+import { useAppDispatch } from '../../app/hooks/reduxHooks'
 
 type DragBoxProps = {
   name: string
@@ -9,6 +10,7 @@ type DragBoxProps = {
   componentMeta: DraggableComponent
 }
 const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps) => {
+  const dispatch = useAppDispatch()
   const [, dragRef] = useDrag(
     () => ({
       type: 'DRAGBOX',
@@ -25,6 +27,10 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps
     []
   )
 
+  const handleReplace = useCallback(() => {
+    dispatch(replaceSchema(componentMeta.jsonSchemaElement))
+  }, [dispatch, componentMeta])
+
   return (
     <Card ref={dragRef}>
       <CardActionArea>
@@ -33,6 +39,9 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps
             {name}
           </Typography>
         </CardContent>
+        <CardActionArea>
+          <Button onClick={handleReplace}>replace current</Button>
+        </CardActionArea>
       </CardActionArea>
     </Card>
   )

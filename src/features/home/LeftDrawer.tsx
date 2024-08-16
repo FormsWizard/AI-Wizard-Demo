@@ -5,14 +5,17 @@ import Drawer from '@mui/material/Drawer'
 import Toolbar from '@mui/material/Toolbar'
 
 import DragBox from './DragBox'
-import { DraggableComponent } from '../wizard/WizardSlice'
+import { DraggableComponent, selectJsonSchema, selectUiSchema } from '../wizard/WizardSlice'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
-import { Tab } from '@mui/material'
+import { Button, Tab } from '@mui/material'
 import { useCallback } from 'react'
 import { updateScopeOfUISchemaElement } from '../../utils/uiSchemaHelpers'
 import { ConfirmButton } from '../modals/ChatGptModal'
-import { useSelector } from 'react-redux'
 import { selectTemplates } from '../wizard/TemplateSlice'
+import { useAppDispatch, useAppSelector } from '../../app/hooks/reduxHooks'
+import { ClickBox } from './ClickBox'
+import { listFormData, newForm } from '../wizard/FormDataSlice'
+import { CreateRounded } from '@mui/icons-material'
 
 const drawerWidth = 240
 
@@ -116,9 +119,24 @@ export const advancedDraggableComponents: DraggableComponent[] = [
   },
 ]
 
+export const NewEntryButton = () => {
+  const dispatch = useAppDispatch()
+  const jsonSchema = useAppSelector(selectJsonSchema)
+  const uiSchema = useAppSelector(selectUiSchema)
+  const handleNewEntry = useCallback(() => {
+    dispatch(newForm({ jsonSchema, uiSchema }))
+  }, [dispatch, jsonSchema, uiSchema])
+  return (
+    <Button startIcon={<CreateRounded />} variant={'contained'} onClick={handleNewEntry}>
+      New Entry
+    </Button>
+  )
+}
+
 export default function LeftDrawer() {
   const [activeTab, setActiveTab] = React.useState('1')
-  const templates = useSelector(selectTemplates)
+  const templates = useAppSelector(selectTemplates)
+  const formDataList = useAppSelector(listFormData)
   const handleChange = useCallback(
     (event, newValue) => {
       setActiveTab(newValue)
@@ -145,6 +163,7 @@ export default function LeftDrawer() {
           <TabList onChange={handleChange} aria-label="lab API tabs example">
             <Tab label="Tools" value="1" />
             <Tab label="Templates" value="2" />
+            <Tab label="Data" value="3" />
           </TabList>
         </Box>
         <TabPanel value="1" sx={{ p: 0 }}>
@@ -162,12 +181,18 @@ export default function LeftDrawer() {
           </Box>
         </TabPanel>
         <TabPanel value="2" sx={{ p: 0 }}>
+          <ConfirmButton>KI gestützte Formulargenerierung</ConfirmButton>
           {advancedDraggableComponents.map((component, index) => {
             return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
           })}
-          <ConfirmButton>Chat GPT</ConfirmButton>
           {templates.map((component, index) => {
             return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
+          })}
+        </TabPanel>
+        <TabPanel value={'3'} sx={{ p: 0 }}>
+          <NewEntryButton></NewEntryButton>
+          {formDataList.map(({ id, title, avatar }) => {
+            return <ClickBox key={id} title={title} avatar={avatar} id={id}></ClickBox>
           })}
         </TabPanel>
       </TabContext>
