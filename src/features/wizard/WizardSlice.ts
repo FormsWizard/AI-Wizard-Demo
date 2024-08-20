@@ -48,12 +48,15 @@ const initialState: JsonFormsEditState = {
 
 export type DraggableComponent = {
   name: string
+  originalPrompt?: string
   jsonSchemaElement: JsonSchema
   uiSchema?: UISchemaElement
 }
 export const selectJsonSchema = (state: RootState) => state.jsonFormsEdit.jsonSchema
 
 export const selectUiSchema = (state: RootState) => state.jsonFormsEdit.uiSchema
+
+export const selectOriginalPrompt = (state: RootState) => state.jsonFormsEdit.uiSchema?.originalPrompt
 
 export const selectSelectedElementKey = (state: RootState) => state.jsonFormsEdit.selectedElementKey
 

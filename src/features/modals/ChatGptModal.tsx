@@ -15,13 +15,14 @@ import { Backdrop, CircularProgress, Grid, Tab, TextField } from '@mui/material'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { addTemplate } from '../wizard/TemplateSlice'
 import { generateDefaultUISchema } from '@jsonforms/core'
-import { DraggableComponent } from '../wizard/WizardSlice'
+import {DraggableComponent, replaceSchema, replaceUISchema} from '../wizard/WizardSlice'
 import Box from '@mui/material/Box'
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
 import DropTargetFormsPreview from '../dragAndDrop/DropTargetFormsPreview'
 import Vocal from '@untemps/react-vocal'
 import { AndroidRounded } from '@mui/icons-material'
 import { useAI } from '../../app/hooks/aiContext'
+import {newForm} from "../wizard/FormDataSlice";
 
 interface ConfirmModalProps {
   onConfirm?: () => void
@@ -29,7 +30,8 @@ interface ConfirmModalProps {
   confirmButtonTextID?: string
   cancelButtonTextID?: string
   modalBodyTextID?: string
-  modalHeaderTextID?: string
+  modalHeaderTextID?: string,
+  defaultPrompt?: string
 }
 
 const Transition = React.forwardRef(function Transition(
@@ -39,11 +41,11 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />
 })
 
-const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => null, onReject = () => null }) => {
+const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => null, onReject = () => null, defaultPrompt }) => {
   const modal = useModal()
   const [response, setResponse] = useState('')
   const [formTitle, setFormTitle] = useState('AI-generated form')
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState(defaultPrompt || '')
   const [newElement, setNewElement] = useState<DraggableComponent | undefined>(undefined)
   const dispatch = useAppDispatch()
   const [activeTab, setActiveTab] = useState('2')
@@ -61,6 +63,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
       let jsonSchema = JSON.parse(response)
       const element = {
         name: formTitle,
+        originalPrompt: message,
         jsonSchemaElement: jsonSchema,
         uiSchema: {
           type: 'Group',
@@ -73,7 +76,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
     } catch (e) {
       console.error(e)
     }
-  }, [response, formTitle])
+  }, [response, formTitle, message, setNewElement])
 
   const talkToAI = useCallback(
     async (text) => {
@@ -149,6 +152,21 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
     },
     [setActiveTab]
   )
+
+  const handleReplace = useCallback(() => {
+
+    dispatch(
+      addTemplate({
+        element: newElement,
+      })
+    )
+    const componentMeta = newElement
+    dispatch(replaceSchema(componentMeta.jsonSchemaElement))
+    dispatch(replaceUISchema(componentMeta.uiSchema))
+    dispatch(newForm({ jsonSchema: componentMeta.jsonSchemaElement, uiSchema: componentMeta.uiSchema, originalPrompt: componentMeta.originalPrompt }))
+    modal.hide()
+    onConfirm()
+  }, [newElement, dispatch, modal, onConfirm])
   return (
     <Dialog
       TransitionComponent={Transition}
@@ -202,7 +220,8 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleAgree} color="primary">
+        <Button variant={'contained'} color='secondary' onClick={handleReplace} disabled={!newElement}>aktuelles Formular ersetzten</Button>
+        <Button onClick={handleAgree} color="primary" disabled={!newElement}>
           <FormattedMessage description="confirm modal header" defaultMessage="agree" id="agree"></FormattedMessage>
         </Button>
         <Button onClick={handleDisagree} color="primary">
@@ -229,9 +248,9 @@ export function ConfirmButton({
         NiceModal.show(ChatGptModal, {
           onConfirm,
           onReject,
+          ...props
         })
       }
-      {...props}
     >
       {children}
     </Button>

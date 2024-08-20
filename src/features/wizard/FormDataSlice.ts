@@ -7,6 +7,7 @@ export type FormContent = {
   id: string
   title: string
   avatar?: string
+  originalPrompt?: string,
   jsonSchema: JsonSchema
   uiSchema: ScopableUISchemaElement | null | undefined
   formData: any
@@ -72,11 +73,12 @@ export const formsContentSlice = createSlice({
     setAvatar: (state: FormsContentReducer, action: PayloadAction<string>) => {
       state.formData[state.currentID].avatar = action.payload
     },
-    newForm: (state: FormsContentReducer, action: PayloadAction<{ jsonSchema: JsonSchema; uiSchema: any }>) => {
+    newForm: (state: FormsContentReducer, action: PayloadAction<{ jsonSchema: JsonSchema; uiSchema: any, originalPrompt?: string }>) => {
       const newID = new Date().getTime().toString()
       state.formData[newID] = {
         id: newID,
         title: 'New Form',
+        originalPrompt: action.payload.originalPrompt,
         jsonSchema: action.payload.jsonSchema,
         uiSchema: action.payload.uiSchema,
         formData: {},

@@ -5,7 +5,7 @@ import Drawer from '@mui/material/Drawer'
 import Toolbar from '@mui/material/Toolbar'
 
 import DragBox from './DragBox'
-import { DraggableComponent, selectJsonSchema, selectUiSchema } from '../wizard/WizardSlice'
+import {DraggableComponent, selectJsonSchema, selectOriginalPrompt, selectUiSchema} from '../wizard/WizardSlice'
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Button, Tab } from '@mui/material'
 import { useCallback } from 'react'
@@ -142,9 +142,10 @@ export const NewEntryButton = () => {
   const dispatch = useAppDispatch()
   const jsonSchema = useAppSelector(selectJsonSchema)
   const uiSchema = useAppSelector(selectUiSchema)
+  const originalPrompt = useAppSelector(selectOriginalPrompt)
   const handleNewEntry = useCallback(() => {
-    dispatch(newForm({ jsonSchema, uiSchema }))
-  }, [dispatch, jsonSchema, uiSchema])
+    dispatch(newForm({ jsonSchema, uiSchema, originalPrompt }))
+  }, [dispatch, jsonSchema, uiSchema, originalPrompt])
   return (
     <Button startIcon={<CreateRounded />} variant={'contained'} onClick={handleNewEntry}>
       New Entry
@@ -207,13 +208,13 @@ export default function LeftDrawer() {
             return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
           })}
           {templates.map((component, index) => {
-            return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
+            return <DragBox name={component.name} key={component.name} componentMeta={component} originalPrompt={component.originalPrompt}></DragBox>
           })}
         </TabPanel>
         <TabPanel value={'3'} sx={{ p: 0 }}>
           <NewEntryButton></NewEntryButton>
-          {formDataList.map(({ id, title, avatar }) => {
-            return <ClickBox key={id} title={title} avatar={avatar} id={id}></ClickBox>
+          {formDataList.map(({ id, title, avatar, originalPrompt }) => {
+            return <ClickBox key={id} title={title} avatar={avatar} id={id} originalPrompt={originalPrompt}></ClickBox>
           })}
         </TabPanel>
       </TabContext>
