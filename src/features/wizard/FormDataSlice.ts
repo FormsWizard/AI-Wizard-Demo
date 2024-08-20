@@ -1,5 +1,3 @@
-//now we create a reducer for formData including an ID and a JSON Schema
-
 import { JsonSchema } from '@jsonforms/core'
 import { ScopableUISchemaElement } from '../../types'
 import { RootState } from '../../app/store'
@@ -28,30 +26,42 @@ export const selectFormData = (state: RootState) => state.formsData.formData[sta
 export const selectCurrentForm = (state: RootState) => state.formsData.formData[state.formsData.currentID]
 
 export const listFormData = (state: RootState) => Object.values(state.formsData.formData)
-export const formsContentSlice = createSlice({
-  name: 'formsContent',
-  initialState: {
-    currentID: initialID,
-    formData: {
-      [initialID]: {
-        id: initialID,
-        title: 'Showcase',
-        jsonSchema: {
-          type: 'object',
-          properties: {
-            name: { type: 'string' },
-          },
-        },
-        uiSchema: null,
-        formData: {
-          name: 'Showcase',
+
+export const initialFormState: FormsContentReducer = {
+  currentID: initialID,
+  formData: {
+    [initialID]: {
+      id: initialID,
+      title: 'Showcase',
+      jsonSchema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
         },
       },
+      uiSchema: null,
+      formData: {
+        name: 'Showcase',
+      },
     },
-  } as FormsContentReducer,
+  },
+}
+export const formsContentSlice = createSlice({
+  name: 'formsContent',
+  initialState: initialFormState,
   reducers: {
+    restoreForms: (state: FormsContentReducer, action: PayloadAction<FormsContentReducer>) => {
+      state.formData = action.payload.formData
+      state.currentID = action.payload.currentID
+    },
     setData: (state: FormsContentReducer, action: PayloadAction<any>) => {
       state.formData[state.currentID].formData = action.payload
+    },
+    removeForm: (state: FormsContentReducer, action: PayloadAction<{ id: string }>) => {
+      delete state.formData[action.payload.id]
+      if (state.currentID === action.payload.id) {
+        state.currentID = Object.keys(state.formData)[0]
+      }
     },
     loadForm: (state: FormsContentReducer, action: PayloadAction<{ id: string }>) => {
       state.currentID = action.payload.id
@@ -76,5 +86,5 @@ export const formsContentSlice = createSlice({
   },
 })
 
-export const { newForm, setData, setAvatar, setTitle, loadForm } = formsContentSlice.actions
+export const { newForm, setData, setAvatar, setTitle, loadForm, removeForm, restoreForms } = formsContentSlice.actions
 export const formsDataReducer = formsContentSlice.reducer

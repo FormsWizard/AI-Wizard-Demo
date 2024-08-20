@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react'
 import { TreeItem, TreeView } from '@mui/lab'
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox, FormControlLabel, Typography } from '@mui/material'
 import { ChevronRight, ExpandMore } from '@mui/icons-material'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { selectElement, selectSelectedElementKey } from './WizardSlice'
 import { useSelector } from 'react-redux'
+import { OverflowContainer } from './OverflowContainer'
 
 export interface RenderTree {
   id: string
@@ -92,7 +93,9 @@ export default function RecursiveTreeView({ data, checkboxes, omitString }: Prop
               key={key}
             />
           ) : (
-            <>{nodes.name}</>
+            <OverflowContainer tooltip={nodes.name}>
+              <Typography noWrap>{nodes.name}</Typography>{' '}
+            </OverflowContainer>
           )
         }
       >

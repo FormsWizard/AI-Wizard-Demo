@@ -151,6 +151,9 @@ export const jsonFormsEditSlice = createSlice({
       state.jsonSchema = schema
       state.uiSchema = undefined
     },
+    replaceUISchema: (state: JsonFormsEditState, action: PayloadAction<UISchemaElement | undefined | null>) => {
+      state.uiSchema = action.payload
+    },
     insertControl: (
       state: JsonFormsEditState,
       action: PayloadAction<{
@@ -225,6 +228,7 @@ export const {
   updateUISchemaByScope,
   toggleEditMode,
   replaceSchema,
+  replaceUISchema,
 } = jsonFormsEditSlice.actions
 
 export default jsonFormsEditSlice.reducer

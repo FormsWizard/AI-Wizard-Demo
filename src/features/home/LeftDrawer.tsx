@@ -17,7 +17,7 @@ import { ClickBox } from './ClickBox'
 import { listFormData, newForm } from '../wizard/FormDataSlice'
 import { CreateRounded } from '@mui/icons-material'
 
-const drawerWidth = 240
+const drawerWidth = 340
 
 export const basicDraggableComponents: DraggableComponent[] = [
   {
@@ -49,6 +49,26 @@ export const basicDraggableComponents: DraggableComponent[] = [
       options: {
         multi: true,
       },
+    },
+  },
+  {
+    name: 'Auswahlfeld',
+    jsonSchemaElement: {
+      type: 'string',
+      enum: ['DE', 'IT', 'JP', 'US', 'RU', 'Other'],
+    },
+  },
+  {
+    name: 'Zahleneingabe',
+    jsonSchemaElement: {
+      type: 'number',
+    },
+  },
+  {
+    name: 'E-Mail',
+    jsonSchemaElement: {
+      type: 'string',
+      format: 'email',
     },
   },
 ]
@@ -161,12 +181,12 @@ export default function LeftDrawer() {
       <TabContext value={activeTab}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <TabList onChange={handleChange} aria-label="lab API tabs example">
-            <Tab label="Tools" value="1" />
-            <Tab label="Templates" value="2" />
+            <Tab label="Templates" value="1" />
+            <Tab label="Tools" value="2" />
             <Tab label="Data" value="3" />
           </TabList>
         </Box>
-        <TabPanel value="1" sx={{ p: 0 }}>
+        <TabPanel value="2" sx={{ p: 0 }}>
           <Box
             sx={{
               overflow: 'auto',
@@ -176,11 +196,13 @@ export default function LeftDrawer() {
             }}
           >
             {basicDraggableComponents.map((component, index) => {
-              return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>
+              return (
+                <DragBox name={component.name} key={component.name} componentMeta={component} disableActions></DragBox>
+              )
             })}
           </Box>
         </TabPanel>
-        <TabPanel value="2" sx={{ p: 0 }}>
+        <TabPanel value="1" sx={{ p: 0 }}>
           <ConfirmButton>KI gestützte Formulargenerierung</ConfirmButton>
           {advancedDraggableComponents.map((component, index) => {
             return <DragBox name={component.name} key={component.name} componentMeta={component}></DragBox>

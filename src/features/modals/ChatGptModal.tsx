@@ -10,8 +10,8 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react'
 
 import { FormattedMessage } from 'react-intl'
 import { TransitionProps } from '@mui/material/transitions'
-import openaiInstance, { model } from '../../utils/openai'
-import { Grid, Tab, TextField } from '@mui/material'
+import { model } from '../../utils/openai'
+import { Backdrop, CircularProgress, Grid, Tab, TextField } from '@mui/material'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { addTemplate } from '../wizard/TemplateSlice'
 import { generateDefaultUISchema } from '@jsonforms/core'
@@ -22,6 +22,7 @@ import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
 import DropTargetFormsPreview from '../dragAndDrop/DropTargetFormsPreview'
 import Vocal from '@untemps/react-vocal'
 import { AndroidRounded } from '@mui/icons-material'
+import { useAI } from '../../app/hooks/aiContext'
 
 interface ConfirmModalProps {
   onConfirm?: () => void
@@ -48,6 +49,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
   const dispatch = useAppDispatch()
   const [activeTab, setActiveTab] = useState('2')
   const [loading, setLoading] = useState(false)
+  const { openAIInstance } = useAI()
   const onVocalResult = useCallback(
     (result) => {
       setMessage((msg) => `${msg} ${result}`)
@@ -61,12 +63,12 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
       const element = {
         name: formTitle,
         jsonSchemaElement: jsonSchema,
-        uiSchema: updateScopeOfUISchemaElement('#', `#/properties/${formTitle}`, {
+        uiSchema: {
           type: 'Group',
           //@ts-ignore
           label: formTitle,
           elements: [generateDefaultUISchema(jsonSchema)],
-        }),
+        },
       }
       setNewElement(element)
     } catch (e) {
@@ -77,7 +79,11 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
   const talkToAI = useCallback(
     async (text) => {
       // Insert message at first element.
-      const response = await openaiInstance.chat.completions.create({
+      let client = openAIInstance
+      if (!client) return
+
+      setLoading(true)
+      const response = await client.chat.completions.create({
         model: model,
         messages: [
           {
@@ -90,7 +96,8 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
       console.log(response)
       // Append AI message.
       const res = response.choices[0].message.content
-      setResponse(res)
+      res && setResponse(res)
+      if (!res) return
       let formTitle: string | null = null
       try {
         const schema = JSON.parse(res)
@@ -98,10 +105,10 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
           formTitle = schema.title
         }
       } catch (e) {
-        console.warn(e.message)
+        console.warn('Could not parse JSON Schema title', e)
       }
       if (!formTitle) {
-        const titleResponse = await openaiInstance.chat.completions.create({
+        const titleResponse = await client.chat.completions.create({
           model: model,
           messages: [
             { role: 'user', content: `A short headline or title that summarizes the following form: ${text}` },
@@ -111,14 +118,13 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
         formTitle = titleResponse.choices[0].message.content
       }
 
-      setFormTitle(formTitle)
+      formTitle && setFormTitle(formTitle)
       setLoading(false)
     },
-    [setResponse, setFormTitle, setLoading]
+    [setResponse, setFormTitle, setLoading, openAIInstance]
   )
   const onSubmit = useCallback(
     (event) => {
-      setLoading(true)
       talkToAI(message)
     },
     [talkToAI, message, setLoading]
@@ -191,7 +197,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
               />
             </TabPanel>
             <TabPanel value="2" sx={{ p: 0 }}>
-              {newElement && <DropTargetFormsPreview metadata={newElement} />}
+              {newElement && <DropTargetFormsPreview metadata={newElement} topLevelUISchema />}
             </TabPanel>
           </TabContext>
         </Grid>
@@ -201,7 +207,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
           <FormattedMessage description="confirm modal header" defaultMessage="agree" id="agree"></FormattedMessage>
         </Button>
         <Button onClick={handleDisagree} color="primary">
-          <FormattedMessage description="confirm modal header" defaultMessage="cancel" id="cancel"></FormattedMessage>
+          <FormattedMessage description="cancel modal header" defaultMessage="cancel" id="cancel"></FormattedMessage>
         </Button>
       </DialogActions>
     </Dialog>
@@ -214,10 +220,12 @@ export function ConfirmButton({
   children,
   ...props
 }: ConfirmModalProps & { children: React.ReactNode }) {
+  const { openAIInstance } = useAI()
   return (
     <Button
       startIcon={<AndroidRounded />}
       variant={'contained'}
+      disabled={!openAIInstance}
       onClick={() =>
         NiceModal.show(ChatGptModal, {
           onConfirm,

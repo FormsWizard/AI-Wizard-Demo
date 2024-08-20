@@ -1,15 +1,18 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback } from 'react'
 import { useDrag } from 'react-dnd'
-import { Button, Card, CardActionArea, CardActions, CardContent, Typography } from '@mui/material'
-import { DraggableComponent, replaceSchema } from '../wizard/WizardSlice'
+import { Button, Card, CardActionArea, CardContent, Typography } from '@mui/material'
+import { DraggableComponent, replaceSchema, replaceUISchema } from '../wizard/WizardSlice'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
+import { newForm } from '../wizard/FormDataSlice'
+import { removeTemplate } from '../wizard/TemplateSlice'
 
 type DragBoxProps = {
   name: string
   img?: string
   componentMeta: DraggableComponent
+  disableActions?: boolean
 }
-const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps) => {
+const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta, disableActions }: DragBoxProps) => {
   const dispatch = useAppDispatch()
   const [, dragRef] = useDrag(
     () => ({
@@ -29,6 +32,12 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps
 
   const handleReplace = useCallback(() => {
     dispatch(replaceSchema(componentMeta.jsonSchemaElement))
+    dispatch(replaceUISchema(componentMeta.uiSchema))
+    dispatch(newForm({ jsonSchema: componentMeta.jsonSchemaElement, uiSchema: componentMeta.uiSchema }))
+  }, [dispatch, componentMeta])
+
+  const handleRemove = useCallback(() => {
+    dispatch(removeTemplate({ element: componentMeta }))
   }, [dispatch, componentMeta])
 
   return (
@@ -39,9 +48,12 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta }: DragBoxProps
             {name}
           </Typography>
         </CardContent>
-        <CardActionArea>
-          <Button onClick={handleReplace}>replace current</Button>
-        </CardActionArea>
+        {!disableActions && (
+          <CardActionArea>
+            <Button onClick={handleReplace}>Formular ersetzen</Button>
+            <Button onClick={handleRemove}>Template entfernen</Button>
+          </CardActionArea>
+        )}
       </CardActionArea>
     </Card>
   )

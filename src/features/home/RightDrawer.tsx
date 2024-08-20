@@ -21,6 +21,7 @@ import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { pathToScope } from '../../utils/uiSchemaHelpers'
 import RecursiveTreeView, { RenderTree } from '../wizard/JSONSchemaTreeView'
 import { JsonSchema7 } from '@jsonforms/core'
+import { selectCurrentForm, selectFormData } from '../wizard/FormDataSlice'
 
 const drawerWidth = 240
 
@@ -112,14 +113,47 @@ const jsonSchema2RenderTreeView: (key: string, jsonSchema: JsonSchema7) => Rende
   }
 }
 
+const jsonDataObj2RenderTreeView: (key: string, jsonData: object) => RenderTree = (key, jsonData) => {
+  return {
+    id: key,
+    name: key,
+    children: Object.keys(jsonData || {}).map((innerKey) =>
+      jsonData2RenderTreeView(`${innerKey}`, jsonData[innerKey] as any)
+    ),
+  }
+}
+
+const jsonDataArray2RenderTreeView: (key: string, jsonData: any[]) => RenderTree = (key, jsonData) => {
+  return {
+    id: key,
+    name: key,
+    children: jsonData.map((item, index) => jsonData2RenderTreeView(`[${index}]`, item)),
+  }
+}
+
+const jsonData2RenderTreeView: (key: string, jsonData: any) => RenderTree = (key, jsonData) => {
+  if (Array.isArray(jsonData)) {
+    return jsonDataArray2RenderTreeView(key, jsonData)
+  } else if (typeof jsonData === 'object') {
+    return jsonDataObj2RenderTreeView(key, jsonData)
+  } else {
+    return {
+      id: key,
+      name: `${key} = ${String(jsonData)}`,
+      children: [],
+    }
+  }
+}
 export default function RightDrawer() {
   const selectedKey = useSelector(selectSelectedElementKey)
   const uiSchema = useSelector(selectUIElementFromSelection)
+  const formData = useSelector(selectCurrentForm)
   const jsonSchema = useSelector(selectJsonSchema)
   const jsonSchemaTree = useMemo<RenderTree>(
     () => jsonSchema2RenderTreeView('Schema', jsonSchema as JsonSchema7),
     [jsonSchema]
   )
+  const formDataTree = useMemo<RenderTree>(() => jsonData2RenderTreeView('Data', formData), [formData])
   const dispatch = useAppDispatch()
   const handleLabelChange = useCallback(
     (e) => {
@@ -163,6 +197,10 @@ export default function RightDrawer() {
       <Divider />
       <Box sx={{ overflow: 'auto', p: 0 }}>
         <RecursiveTreeView key={jsonSchemaTree.id} data={jsonSchemaTree} checkboxes={false} omitString={'Schema.'} />
+      </Box>
+      <Divider />
+      <Box sx={{ overflow: 'auto', p: 0 }}>
+        <RecursiveTreeView key={formData.id} data={formDataTree} checkboxes={false} omitString={'Data.'} />
       </Box>
     </Drawer>
   )

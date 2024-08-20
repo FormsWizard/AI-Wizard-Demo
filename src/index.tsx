@@ -14,6 +14,7 @@ import { IntlProvider } from 'react-intl'
 import { TouchBackend } from 'react-dnd-touch-backend'
 import reportWebVitals from './reportWebVitals'
 import { PersistGate } from 'redux-persist/integration/react'
+import { AIProvider } from './app/hooks/aiContext'
 const container = document.getElementById('root')!
 const root = createRoot(container)
 console.log('APP running in touch mode: ' + isTouchDevice())
@@ -23,15 +24,17 @@ root.render(
     <Provider store={store}>
       <PersistGate persistor={persistor} loading={null}>
         <ThemeProvider theme={theme}>
-          <DndProvider backend={backend}>
-            <IntlProvider messages={{}} locale="de" defaultLocale="en">
-              <NiceModal.Provider>
-                <HashRouter>
-                  <App />
-                </HashRouter>
-              </NiceModal.Provider>
-            </IntlProvider>
-          </DndProvider>
+          <AIProvider>
+            <DndProvider backend={backend}>
+              <IntlProvider messages={{}} locale="de" defaultLocale="en">
+                <NiceModal.Provider>
+                  <HashRouter>
+                    <App />
+                  </HashRouter>
+                </NiceModal.Provider>
+              </IntlProvider>
+            </DndProvider>
+          </AIProvider>
         </ThemeProvider>
       </PersistGate>
     </Provider>
