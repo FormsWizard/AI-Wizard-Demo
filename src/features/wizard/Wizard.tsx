@@ -50,14 +50,15 @@ function Wizard() {
 
   const getTitleOfData = useCallback(
     async (d: any) => {
-      let client: OpenAI | null = null
+      let client: OpenAI | null = openAIInstance
       if (!client) return
+      console.log('getTitleOfData', d)
       const response = await client.chat.completions.create({
         model: model,
         messages: [
           {
             role: 'user',
-            content: `give a good summarizing title of the following data: \n ${JSON.stringify(data, null, 2)}`,
+            content: `give a good summarizing title of the following data: \n ${JSON.stringify(d, null, 2)}`,
           },
         ],
         max_tokens: 300,
@@ -67,7 +68,7 @@ function Wizard() {
       const res = response.choices[0].message.content
       typeof res === 'string' && dispatch(setTitle(res.replace('"', '')))
     },
-    [dispatch]
+    [dispatch, openAIInstance]
   )
 
   const fillData = useCallback(async () => {
@@ -107,7 +108,7 @@ function Wizard() {
       dispatch(setData(d))
       dispatch(setAvatar(imageURL))
       setInProgress(false)
-      setTimeout(() => getTitleOfData(d), 1000)
+      await getTitleOfData(d)
     } catch (e) {
       console.warn(e)
     }
