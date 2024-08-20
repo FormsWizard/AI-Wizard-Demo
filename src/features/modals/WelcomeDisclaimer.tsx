@@ -45,7 +45,7 @@ export const WelcomeDisclaimer = NiceModal.create<WelcomeDisclaimerProps>(({ onC
         <FormattedMessage
           id={'welcome_key_modal_header'}
           description="Forms Wizard AI Showcase"
-          defaultMessage="Please enter your Open AI API Key"
+          defaultMessage="Form Wizard Disclaimer"
         ></FormattedMessage>
       </DialogTitle>
       <DialogContent>

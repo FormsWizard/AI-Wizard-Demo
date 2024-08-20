@@ -15,14 +15,15 @@ import { Backdrop, CircularProgress, Grid, Tab, TextField } from '@mui/material'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { addTemplate } from '../wizard/TemplateSlice'
 import { generateDefaultUISchema } from '@jsonforms/core'
-import {DraggableComponent, replaceSchema, replaceUISchema} from '../wizard/WizardSlice'
+import { DraggableComponent, replaceSchema, replaceUISchema } from '../wizard/WizardSlice'
 import Box from '@mui/material/Box'
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
 import DropTargetFormsPreview from '../dragAndDrop/DropTargetFormsPreview'
 import Vocal from '@untemps/react-vocal'
 import { AndroidRounded } from '@mui/icons-material'
 import { useAI } from '../../app/hooks/aiContext'
-import {newForm} from "../wizard/FormDataSlice";
+import { newForm } from '../wizard/FormDataSlice'
+import { parseAIGeneratedJSON } from '../../utils/parseAIGeneratedJSON'
 
 interface ConfirmModalProps {
   onConfirm?: () => void
@@ -30,7 +31,7 @@ interface ConfirmModalProps {
   confirmButtonTextID?: string
   cancelButtonTextID?: string
   modalBodyTextID?: string
-  modalHeaderTextID?: string,
+  modalHeaderTextID?: string
   defaultPrompt?: string
 }
 
@@ -41,196 +42,206 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />
 })
 
-const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => null, onReject = () => null, defaultPrompt }) => {
-  const modal = useModal()
-  const [response, setResponse] = useState('')
-  const [formTitle, setFormTitle] = useState('AI-generated form')
-  const [message, setMessage] = useState(defaultPrompt || '')
-  const [newElement, setNewElement] = useState<DraggableComponent | undefined>(undefined)
-  const dispatch = useAppDispatch()
-  const [activeTab, setActiveTab] = useState('2')
-  const [loading, setLoading] = useState(false)
-  const { openAIInstance } = useAI()
-  const onVocalResult = useCallback(
-    (result) => {
-      setMessage((msg) => `${msg} ${result}`)
-    },
-    [setMessage]
-  )
+const ChatGptModal = NiceModal.create<ConfirmModalProps>(
+  ({ onConfirm = () => null, onReject = () => null, defaultPrompt }) => {
+    const modal = useModal()
+    const [response, setResponse] = useState('')
+    const [formTitle, setFormTitle] = useState('AI-generated form')
+    const [message, setMessage] = useState(defaultPrompt || '')
+    const [newElement, setNewElement] = useState<DraggableComponent | undefined>(undefined)
+    const dispatch = useAppDispatch()
+    const [activeTab, setActiveTab] = useState('2')
+    const [loading, setLoading] = useState(false)
+    const { openAIInstance } = useAI()
+    const onVocalResult = useCallback(
+      (result) => {
+        setMessage((msg) => `${msg} ${result}`)
+      },
+      [setMessage]
+    )
 
-  useEffect(() => {
-    try {
-      let jsonSchema = JSON.parse(response)
-      const element = {
-        name: formTitle,
-        originalPrompt: message,
-        jsonSchemaElement: jsonSchema,
-        uiSchema: {
-          type: 'Group',
-          //@ts-ignore
-          label: formTitle,
-          elements: [generateDefaultUISchema(jsonSchema)],
-        },
-      }
-      setNewElement(element)
-    } catch (e) {
-      console.error(e)
-    }
-  }, [response, formTitle, message, setNewElement])
-
-  const talkToAI = useCallback(
-    async (text) => {
-      // Insert message at first element.
-      let client = openAIInstance
-      if (!client) return
-
-      setLoading(true)
-      const response = await client.chat.completions.create({
-        model: model,
-        messages: [
-          {
-            role: 'user',
-            content: `For a form generate a JSONSchema that meets the following requirements: ${text} \n Only output the parsable JSON Schema - even without the typical markdown code block. Keys und properties should always be in english but labels/titles should be in the language of the requirements text. Add additional fields, that can be derived from your domain knowledge, even if not explicitly asked for.`,
-          },
-        ],
-        max_tokens: 4000,
-      })
-      console.log(response)
-      // Append AI message.
-      const res = response.choices[0].message.content
-      res && setResponse(res)
-      if (!res) return
-      let formTitle: string | null = null
+    useEffect(() => {
       try {
-        const schema = JSON.parse(res)
-        if (typeof schema.title === 'string') {
-          formTitle = schema.title
+        const jsonSchema = parseAIGeneratedJSON(response)
+        if (!jsonSchema) return
+        const element = {
+          name: formTitle,
+          originalPrompt: message,
+          jsonSchemaElement: jsonSchema,
+          uiSchema: {
+            type: 'Group',
+            //@ts-ignore
+            label: formTitle,
+            elements: [generateDefaultUISchema(jsonSchema)],
+          },
         }
+        setNewElement(element)
       } catch (e) {
-        console.warn('Could not parse JSON Schema title', e)
+        console.error(e)
       }
-      if (!formTitle) {
-        const titleResponse = await client.chat.completions.create({
+    }, [response, formTitle, message, setNewElement])
+
+    const talkToAI = useCallback(
+      async (text) => {
+        // Insert message at first element.
+        let client = openAIInstance
+        if (!client) return
+
+        setLoading(true)
+        const response = await client.chat.completions.create({
           model: model,
           messages: [
-            { role: 'user', content: `A short headline or title that summarizes the following form: ${text}` },
+            {
+              role: 'user',
+              content: `For a form generate a JSONSchema that meets the following requirements: ${text} \n Only output the parsable JSON Schema - even without the typical markdown code block. Keys und properties should always be in english but labels/titles should be in the language of the requirements text. Add additional fields, that can be derived from your domain knowledge, even if not explicitly asked for.`,
+            },
           ],
-          max_tokens: 50,
+          max_tokens: 4000,
         })
-        formTitle = titleResponse.choices[0].message.content
-      }
+        console.log(response)
+        // Append AI message.
+        const res = response.choices[0].message.content
+        res && setResponse(res)
+        if (!res) return
+        let formTitle: string | null = null
+        try {
+          const schema = JSON.parse(res)
+          if (typeof schema.title === 'string') {
+            formTitle = schema.title
+          }
+        } catch (e) {
+          console.warn('Could not parse JSON Schema title', e)
+        }
+        if (!formTitle) {
+          const titleResponse = await client.chat.completions.create({
+            model: model,
+            messages: [
+              { role: 'user', content: `A short headline or title that summarizes the following form: ${text}` },
+            ],
+            max_tokens: 50,
+          })
+          formTitle = titleResponse.choices[0].message.content
+        }
 
-      formTitle && setFormTitle(formTitle)
-      setLoading(false)
-    },
-    [setResponse, setFormTitle, setLoading, openAIInstance]
-  )
-  const onSubmit = useCallback(
-    (event) => {
-      talkToAI(message)
-    },
-    [talkToAI, message, setLoading]
-  )
+        formTitle && setFormTitle(formTitle)
+        setLoading(false)
+      },
+      [setResponse, setFormTitle, setLoading, openAIInstance]
+    )
+    const onSubmit = useCallback(
+      (event) => {
+        talkToAI(message)
+      },
+      [talkToAI, message, setLoading]
+    )
 
-  const handleAgree = useCallback(() => {
-    if (newElement)
+    const handleAgree = useCallback(() => {
+      if (newElement)
+        dispatch(
+          addTemplate({
+            element: newElement,
+          })
+        )
+      modal.hide()
+      onConfirm()
+    }, [modal, onConfirm, newElement, dispatch])
+    const handleDisagree = () => {
+      modal.hide()
+      onReject()
+    }
+    const handleChange = useCallback(
+      (event, newValue) => {
+        setActiveTab(newValue)
+      },
+      [setActiveTab]
+    )
+
+    const handleReplace = useCallback(() => {
       dispatch(
         addTemplate({
           element: newElement,
         })
       )
-    modal.hide()
-    onConfirm()
-  }, [modal, onConfirm, newElement, dispatch])
-  const handleDisagree = () => {
-    modal.hide()
-    onReject()
-  }
-  const handleChange = useCallback(
-    (event, newValue) => {
-      setActiveTab(newValue)
-    },
-    [setActiveTab]
-  )
-
-  const handleReplace = useCallback(() => {
-
-    dispatch(
-      addTemplate({
-        element: newElement,
-      })
-    )
-    const componentMeta = newElement
-    dispatch(replaceSchema(componentMeta.jsonSchemaElement))
-    dispatch(replaceUISchema(componentMeta.uiSchema))
-    dispatch(newForm({ jsonSchema: componentMeta.jsonSchemaElement, uiSchema: componentMeta.uiSchema, originalPrompt: componentMeta.originalPrompt }))
-    modal.hide()
-    onConfirm()
-  }, [newElement, dispatch, modal, onConfirm])
-  return (
-    <Dialog
-      TransitionComponent={Transition}
-      open={modal.visible}
-      onClose={() => modal.hide()}
-      fullWidth
-      TransitionProps={{
-        onExited: () => modal.remove(),
-      }}
-    >
-      <DialogTitle id="alert-dialog-slide-title">
-        <FormattedMessage
-          description="Chat GPT form generator"
-          defaultMessage="Your form should be about:"
-          id="ChatGPTModal_title"
-        ></FormattedMessage>
-      </DialogTitle>
-      <DialogContent>
-        <Grid container direction={'column'}>
-          <Grid item>
-            <TextField multiline fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
-            <Vocal
-              lang={'de-DE'}
-              onResult={onVocalResult}
-              style={{ width: 16, position: 'absolute', right: 10, top: -2 }}
-            />
-          </Grid>
-          <LoadingButton loading={loading} onClick={onSubmit}>
-            Submit
-          </LoadingButton>
-          <TabContext value={activeTab}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <TabList onChange={handleChange} aria-label="lab API tabs example">
-                <Tab label="Form" value="1" />
-                <Tab label="Preview" value="2" disabled={!newElement} />
-              </TabList>
-            </Box>
-            <TabPanel value="1" sx={{ p: 0 }}>
-              <TextField
-                multiline
-                fullWidth
-                label={formTitle}
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
+      const componentMeta = newElement
+      dispatch(replaceSchema(componentMeta.jsonSchemaElement))
+      dispatch(replaceUISchema(componentMeta.uiSchema))
+      dispatch(
+        newForm({
+          jsonSchema: componentMeta.jsonSchemaElement,
+          uiSchema: componentMeta.uiSchema,
+          originalPrompt: componentMeta.originalPrompt,
+        })
+      )
+      modal.hide()
+      onConfirm()
+    }, [newElement, dispatch, modal, onConfirm])
+    return (
+      <Dialog
+        TransitionComponent={Transition}
+        open={modal.visible}
+        onClose={() => modal.hide()}
+        fullWidth
+        TransitionProps={{
+          onExited: () => modal.remove(),
+        }}
+      >
+        <DialogTitle id="alert-dialog-slide-title">
+          <FormattedMessage
+            description="Chat GPT form generator"
+            defaultMessage="Your form should be about:"
+            id="ChatGPTModal_title"
+          ></FormattedMessage>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container direction={'column'}>
+            <Grid item>
+              <TextField multiline fullWidth value={message} onChange={(e) => setMessage(e.target.value)} />
+              <Vocal
+                lang={'de-DE'}
+                onResult={onVocalResult}
+                style={{ width: 16, position: 'absolute', right: 10, top: -2 }}
               />
-            </TabPanel>
-            <TabPanel value="2" sx={{ p: 0 }}>
-              {newElement && <DropTargetFormsPreview metadata={newElement} />}
-            </TabPanel>
-          </TabContext>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button variant={'contained'} color='secondary' onClick={handleReplace} disabled={!newElement}>aktuelles Formular ersetzten</Button>
-        <Button onClick={handleAgree} color="primary" disabled={!newElement}>
-          <FormattedMessage description="confirm modal header" defaultMessage="agree" id="agree"></FormattedMessage>
-        </Button>
-        <Button onClick={handleDisagree} color="primary">
-          <FormattedMessage description="cancel modal header" defaultMessage="cancel" id="cancel"></FormattedMessage>
-        </Button>
-      </DialogActions>
-    </Dialog>
-  )
-})
+            </Grid>
+            <LoadingButton loading={loading} onClick={onSubmit}>
+              Submit
+            </LoadingButton>
+            <TabContext value={activeTab}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <TabList onChange={handleChange} aria-label="lab API tabs example">
+                  <Tab label="Form" value="1" />
+                  <Tab label="Preview" value="2" disabled={!newElement} />
+                </TabList>
+              </Box>
+              <TabPanel value="1" sx={{ p: 0 }}>
+                <TextField
+                  multiline
+                  fullWidth
+                  label={formTitle}
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                />
+              </TabPanel>
+              <TabPanel value="2" sx={{ p: 0 }}>
+                {newElement && <DropTargetFormsPreview metadata={newElement} />}
+              </TabPanel>
+            </TabContext>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button variant={'contained'} color="secondary" onClick={handleReplace} disabled={!newElement}>
+            aktuelles Formular ersetzten
+          </Button>
+          <Button onClick={handleAgree} color="primary" disabled={!newElement}>
+            <FormattedMessage description="confirm modal header" defaultMessage="agree" id="agree"></FormattedMessage>
+          </Button>
+          <Button onClick={handleDisagree} color="primary">
+            <FormattedMessage description="cancel modal header" defaultMessage="cancel" id="cancel"></FormattedMessage>
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+)
 
 export function ConfirmButton({
   onConfirm = () => null,
@@ -248,7 +259,7 @@ export function ConfirmButton({
         NiceModal.show(ChatGptModal, {
           onConfirm,
           onReject,
-          ...props
+          ...props,
         })
       }
     >

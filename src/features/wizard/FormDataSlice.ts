@@ -7,7 +7,7 @@ export type FormContent = {
   id: string
   title: string
   avatar?: string
-  originalPrompt?: string,
+  originalPrompt?: string
   jsonSchema: JsonSchema
   uiSchema: ScopableUISchemaElement | null | undefined
   formData: any
@@ -24,7 +24,8 @@ export const selectCurrentID = (state: RootState) => state.formsData.currentID
 
 export const selectFormData = (state: RootState) => state.formsData.formData[state.formsData.currentID]?.formData
 
-export const selectCurrentForm = (state: RootState) => state.formsData.formData[state.formsData.currentID]
+export const selectCurrentForm = (state: RootState) =>
+  state.formsData.formData[state.formsData.currentID] as FormContent
 
 export const listFormData = (state: RootState) => Object.values(state.formsData.formData)
 
@@ -73,7 +74,10 @@ export const formsContentSlice = createSlice({
     setAvatar: (state: FormsContentReducer, action: PayloadAction<string>) => {
       state.formData[state.currentID].avatar = action.payload
     },
-    newForm: (state: FormsContentReducer, action: PayloadAction<{ jsonSchema: JsonSchema; uiSchema: any, originalPrompt?: string }>) => {
+    newForm: (
+      state: FormsContentReducer,
+      action: PayloadAction<{ jsonSchema: JsonSchema; uiSchema: any; originalPrompt?: string }>
+    ) => {
       const newID = new Date().getTime().toString()
       state.formData[newID] = {
         id: newID,

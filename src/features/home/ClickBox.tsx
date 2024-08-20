@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../app/hooks/reduxHooks'
 import { listFormData, loadForm, removeForm } from '../wizard/FormDataSlice'
 import { red } from '@mui/material/colors'
 import { replaceSchema, replaceUISchema } from '../wizard/WizardSlice'
-import {ConfirmButton} from "../modals/ChatGptModal";
+import { ConfirmButton } from '../modals/ChatGptModal'
 
 type ClickBoxProps = {
   id: string
@@ -50,7 +50,7 @@ export const ClickBox = ({ id, title, avatar, originalPrompt, disableActions }: 
           </Button>
           <Button onClick={handleLoad}>load only Data</Button>
           <Button onClick={handleRemove}>Eintrag entfernen</Button>
-          {originalPrompt && <ConfirmButton defaultPrompt={originalPrompt}>KI text bearbeiten</ConfirmButton> }
+          {originalPrompt && <ConfirmButton defaultPrompt={originalPrompt}>KI text bearbeiten</ConfirmButton>}
         </CardActionArea>
       )}
     </Card>

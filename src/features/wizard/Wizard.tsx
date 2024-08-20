@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { JsonFormsCore } from '@jsonforms/core'
 import { materialCells, materialRenderers } from '@jsonforms/material-renderers'
 import { useAppDispatch, useAppSelector } from '../../app/hooks/reduxHooks'
@@ -16,9 +16,12 @@ import LeftDrawer from '../home/LeftDrawer'
 import { Backdrop, CircularProgress, TextField } from '@mui/material'
 import { model } from '../../utils/openai'
 import Button from '@mui/material/Button'
-import { selectFormData, setAvatar, setData, setTitle } from './FormDataSlice'
+import { selectCurrentForm, selectFormData, setAvatar, setData, setTitle } from './FormDataSlice'
+
 import { useAI } from '../../app/hooks/aiContext'
 import { OpenAI } from 'openai'
+
+import { parseAIGeneratedJSON } from '../../utils/parseAIGeneratedJSON'
 
 const renderers = [
   ...materialRenderers,
@@ -34,6 +37,7 @@ const renderers = [
 
 function Wizard() {
   const data = useAppSelector(selectFormData)
+  const { avatar } = useAppSelector(selectCurrentForm)
   const [inProgress, setInProgress] = useState(false)
   const jsonSchema = useAppSelector(selectJsonSchema)
   const dispatch = useAppDispatch()
@@ -43,10 +47,18 @@ function Wizard() {
     },
     [dispatch]
   )
+  const [error, setError] = useState<string | undefined>()
+  const [additionalHints, setAdditionalHints] = useState<string>('')
   const uiSchema = useAppSelector(selectUiSchema)
   const editMode = useAppSelector(selectEditMode)
   const [imageURL, setImageURL] = useState('')
   const { openAIInstance } = useAI()
+
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      setImageURL(avatar)
+    }
+  }, [setImageURL, avatar])
 
   const getTitleOfData = useCallback(
     async (d: any) => {
@@ -68,7 +80,7 @@ function Wizard() {
       const res = response.choices[0].message.content
       typeof res === 'string' && dispatch(setTitle(res.replace('"', '')))
     },
-    [dispatch, openAIInstance]
+    [dispatch, openAIInstance, setTitle]
   )
 
   const fillData = useCallback(async () => {
@@ -83,11 +95,9 @@ function Wizard() {
           content: [
             {
               type: 'text',
-              text: `Try to analyze the image for information. Do not improvise but only include data that can be derived from the image. Try to fit the information to the fields of the following JSON-schema and deliver the ready to use JSON without any extra information or markup. Produced result must comply to the given JSON-Schema: \n ${JSON.stringify(
-                jsonSchema,
-                null,
-                2
-              )}`,
+              text: `Try to analyze the image for information. Do not improvise but only include data that can be derived from the image. Try to fit the information to the fields of the following JSON-schema and deliver the ready to use JSON without any extra information or markup. ${
+                additionalHints ? `Also follow additional demands - ${additionalHints}. ` : ''
+              } Produced result must comply to the given JSON-Schema: \n ${JSON.stringify(jsonSchema, null, 2)}`,
             },
             {
               type: 'image_url',
@@ -98,22 +108,22 @@ function Wizard() {
           ],
         },
       ],
-      max_tokens: 3000,
+      max_tokens: 4096,
     })
     console.log(response)
     // Append AI message.
     const res = response.choices[0].message.content
-    try {
-      const d = JSON.parse(res.replace('```json', '').replace('```', ''))
+    const d = parseAIGeneratedJSON(res)
+    if (d) {
       dispatch(setData(d))
       dispatch(setAvatar(imageURL))
-      setInProgress(false)
       await getTitleOfData(d)
-    } catch (e) {
-      console.warn(e)
+    } else {
+      setError('Could not parse JSON')
     }
+    setInProgress(false)
     //setResponse(res)
-  }, [jsonSchema, dispatch, imageURL, getTitleOfData, setInProgress, openAIInstance])
+  }, [jsonSchema, dispatch, imageURL, getTitleOfData, setInProgress, openAIInstance, additionalHints])
   return (
     <Box component={'main'} sx={{ display: 'flex', flexGrow: 1, p: 3, mt: 8 }}>
       <MainAppBar></MainAppBar>
@@ -122,7 +132,13 @@ function Wizard() {
         <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={inProgress}>
           <CircularProgress color="inherit" />
         </Backdrop>
+        {error && <div style={{ color: 'red' }}>{error}</div>}
         <TextField value={imageURL} onChange={(e) => setImageURL(e.target.value)} label={'Bild URL'} />
+        <TextField
+          value={additionalHints}
+          onChange={(e) => setAdditionalHints(e.target.value)}
+          label={'weitere Hinweise'}
+        />
         <Button onClick={fillData} disabled={!openAIInstance}>
           analysiere Bild und befülle Formular
         </Button>

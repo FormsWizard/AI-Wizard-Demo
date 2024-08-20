@@ -5,16 +5,16 @@ import { DraggableComponent, replaceSchema, replaceUISchema } from '../wizard/Wi
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { newForm } from '../wizard/FormDataSlice'
 import { removeTemplate } from '../wizard/TemplateSlice'
-import {ConfirmButton} from "../modals/ChatGptModal";
+import { ConfirmButton } from '../modals/ChatGptModal'
 
 type DragBoxProps = {
   name: string
   img?: string
   componentMeta: DraggableComponent
-  disableActions?: boolean,
+  disableActions?: boolean
   originalPrompt?: string
 }
-const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta, disableActions, originalPrompt}: DragBoxProps) => {
+const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta, disableActions, originalPrompt }: DragBoxProps) => {
   const dispatch = useAppDispatch()
   const [, dragRef] = useDrag(
     () => ({
@@ -35,7 +35,13 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta, disableActions
   const handleReplace = useCallback(() => {
     dispatch(replaceSchema(componentMeta.jsonSchemaElement))
     dispatch(replaceUISchema(componentMeta.uiSchema))
-    dispatch(newForm({ jsonSchema: componentMeta.jsonSchemaElement, uiSchema: componentMeta.uiSchema, originalPrompt: componentMeta.originalPrompt }))
+    dispatch(
+      newForm({
+        jsonSchema: componentMeta.jsonSchemaElement,
+        uiSchema: componentMeta.uiSchema,
+        originalPrompt: componentMeta.originalPrompt,
+      })
+    )
   }, [dispatch, componentMeta])
 
   const handleRemove = useCallback(() => {
@@ -54,7 +60,7 @@ const DragBox = ({ name = 'Eingabefeld', img = '', componentMeta, disableActions
           <CardActionArea>
             <Button onClick={handleReplace}>Formular ersetzen</Button>
             <Button onClick={handleRemove}>Template entfernen</Button>
-            {originalPrompt && <ConfirmButton defaultPrompt={originalPrompt}>KI text bearbeiten</ConfirmButton> }
+            {originalPrompt && <ConfirmButton defaultPrompt={originalPrompt}>KI text bearbeiten</ConfirmButton>}
           </CardActionArea>
         )}
       </CardActionArea>
