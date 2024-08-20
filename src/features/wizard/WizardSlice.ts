@@ -201,7 +201,7 @@ export const jsonFormsEditSlice = createSlice({
         console.log(newPath)
         const newSchema =
           uiSchema && uiSchema?.type !== 'Control'
-            ? updateScopeOfUISchemaElement(`#/properties/${newKey}`, pathToScope(newPath), uiSchema)
+            ? updateScopeOfUISchemaElement(`#`, pathToScope(newPath), uiSchema)
             : {
                 ...(uiSchema || {}),
                 type: 'Control',

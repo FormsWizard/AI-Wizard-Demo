@@ -18,8 +18,6 @@ import { model } from '../../utils/openai'
 import Button from '@mui/material/Button'
 import { selectFormData, setAvatar, setData, setTitle } from './FormDataSlice'
 import { useAI } from '../../app/hooks/aiContext'
-import NiceModal from '@ebay/nice-modal-react'
-import { OpenAIKeyModal } from '../modals/OpenAIKeyModal'
 import { OpenAI } from 'openai'
 
 const renderers = [

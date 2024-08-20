@@ -9,7 +9,6 @@ import { DraggableComponent, selectJsonSchema, selectUiSchema } from '../wizard/
 import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { Button, Tab } from '@mui/material'
 import { useCallback } from 'react'
-import { updateScopeOfUISchemaElement } from '../../utils/uiSchemaHelpers'
 import { ConfirmButton } from '../modals/ChatGptModal'
 import { selectTemplates } from '../wizard/TemplateSlice'
 import { useAppDispatch, useAppSelector } from '../../app/hooks/reduxHooks'
@@ -99,7 +98,7 @@ export const advancedDraggableComponents: DraggableComponent[] = [
         },
       },
     },
-    uiSchema: updateScopeOfUISchemaElement('#', '#/properties/person', {
+    uiSchema: {
       type: 'Group',
       //@ts-ignore
       label: 'Person',
@@ -135,7 +134,7 @@ export const advancedDraggableComponents: DraggableComponent[] = [
           ],
         },
       ],
-    }),
+    },
   },
 ]
 

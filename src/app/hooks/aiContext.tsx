@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useAppSelector } from './reduxHooks'
 import { selectApiKey, selectOrganization } from '../../features/wizard/credentialsSlice'
 import NiceModal from '@ebay/nice-modal-react'
-import { OpenAIKeyModal } from '../../features/modals/OpenAIKeyModal'
+import { WelcomeDisclaimer } from '../../features/modals/WelcomeDisclaimer'
 
 type AIContextType = {
   openAIInstance?: OpenAI
@@ -30,7 +30,7 @@ export const AIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   }, [organization, apiKey, setOpenAIInstance])
   useEffect(() => {
     if (!openAIInstance) {
-      NiceModal.show(OpenAIKeyModal, { onConfirm: (instance) => setOpenAIInstance(instance), onReject: () => {} })
+      NiceModal.show(WelcomeDisclaimer, { onConfirm: (instance) => setOpenAIInstance(instance), onReject: () => {} })
     }
   }, [openAIInstance, setOpenAIInstance])
   return <AIContext.Provider value={{ openAIInstance }}>{children}</AIContext.Provider>

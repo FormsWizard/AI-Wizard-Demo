@@ -11,12 +11,12 @@ import { DownloadBackupButton } from '../wizard/DownloadBackupButton'
 import { UploadBackupButton } from '../wizard/UploadBackupButton'
 import { resetStore } from '../../app/store'
 
-type OpenAIKeyModalProps = {
+type WelcomeDisclaimerProps = {
   onConfirm?: (openAIInstance: OpenAI) => void
   onReject?: () => void
 }
 
-export const OpenAIKeyModal = NiceModal.create<OpenAIKeyModalProps>(({ onConfirm, onReject }) => {
+export const WelcomeDisclaimer = NiceModal.create<WelcomeDisclaimerProps>(({ onConfirm, onReject }) => {
   const modal = useModal()
   const organization = useAppSelector(selectOrganization)
   const apiKey = useAppSelector(selectApiKey)
@@ -43,8 +43,8 @@ export const OpenAIKeyModal = NiceModal.create<OpenAIKeyModalProps>(({ onConfirm
     <Dialog open={modal.visible} onClose={() => modal.hide()} fullWidth>
       <DialogTitle>
         <FormattedMessage
-          id={'openai_key_modal_header'}
-          description="Open AI API Key"
+          id={'welcome_key_modal_header'}
+          description="Forms Wizard AI Showcase"
           defaultMessage="Please enter your Open AI API Key"
         ></FormattedMessage>
       </DialogTitle>

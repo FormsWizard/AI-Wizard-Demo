@@ -15,7 +15,6 @@ import { Backdrop, CircularProgress, Grid, Tab, TextField } from '@mui/material'
 import { useAppDispatch } from '../../app/hooks/reduxHooks'
 import { addTemplate } from '../wizard/TemplateSlice'
 import { generateDefaultUISchema } from '@jsonforms/core'
-import { updateScopeOfUISchemaElement } from '../../utils/uiSchemaHelpers'
 import { DraggableComponent } from '../wizard/WizardSlice'
 import Box from '@mui/material/Box'
 import { LoadingButton, TabContext, TabList, TabPanel } from '@mui/lab'
@@ -197,7 +196,7 @@ const ChatGptModal = NiceModal.create<ConfirmModalProps>(({ onConfirm = () => nu
               />
             </TabPanel>
             <TabPanel value="2" sx={{ p: 0 }}>
-              {newElement && <DropTargetFormsPreview metadata={newElement} topLevelUISchema />}
+              {newElement && <DropTargetFormsPreview metadata={newElement} />}
             </TabPanel>
           </TabContext>
         </Grid>
