@@ -55,11 +55,18 @@ export const WelcomeDisclaimer = NiceModal.create<WelcomeDisclaimerProps>(({ onC
             können aus dem aktuellen Browser von Ihnen <DownloadBackupButton>heruntergeladen</DownloadBackupButton>,{' '}
             <UploadBackupButton>wiederhergestellt</UploadBackupButton> oder{' '}
             <Button onClick={() => resetStore()}>gelöscht</Button> werden. Wenn Sie die Anwendung jedoch mit OpenAI
-            verwenden möchten, müssen Sie Ihre OpenAI-Organisation und Ihren OpenAI-API-Schlüssel eingeben. Bei KI
-            gestützten Anfragen, werden dann Daten an OpenAI gesendet. Die Daten, die an OpenAI gesendet werden, können
-            sie im Netzwerk-Tab der Entwicklerwerkzeuge (Strg+Shift+I) einsehen. Ihre eingegebenen Daten bleiben
-            grundsätzlich auf Ihrem Gerät und werden nicht an Dritte weitergegeben. Da dies eine Demo-Anwendung ist,
-            können wir jedoch keine Garantie für die Sicherheit Ihrer Daten übernehmen.
+            verwenden möchten, müssen Sie Ihre{' '}
+            <a href={'https://platform.openai.com/settings/organization/general'} target={'_blank'} rel="noreferrer">
+              OpenAI-Organisation
+            </a>{' '}
+            und Ihren{' '}
+            <a href={'https://platform.openai.com/settings/profile?tab=api-keys'} target={'_blank'} rel="noreferrer">
+              OpenAI-API-Schlüssel
+            </a>{' '}
+            eingeben. Bei KI gestützten Anfragen, werden dann Daten an OpenAI gesendet. Die Daten, die an OpenAI
+            gesendet werden, können sie im Netzwerk-Tab der Entwicklerwerkzeuge (Strg+Shift+I) einsehen. Ihre
+            eingegebenen Daten bleiben grundsätzlich auf Ihrem Gerät und werden nicht an Dritte weitergegeben. Da dies
+            eine Demo-Anwendung ist, können wir jedoch keine Garantie für die Sicherheit Ihrer Daten übernehmen.
           </Typography>
           <TextField
             label="Organization"
