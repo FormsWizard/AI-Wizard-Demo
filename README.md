@@ -8,10 +8,9 @@ The form generator can be used to generate forms for various purposes such as su
 
 ## User Manual
 
-When you open the Demo you will e asked for a valid OpenAI Key, which is needed to use the GPT-2 model. You can get an API key from the OpenAI website.
+When you open the Demo you will e asked for a valid OpenAI Key, which is needed to use the GPT-4 model. You can get an API key from the OpenAI website.
 Because we run in a serverless environment, the key is not stored and you will need to provide it every time you run the demo.
 
-Once you provide the API key, you can enter the text that you want to use as input for the form generator. The form generator will then generate the form fields based on the input text.
 
 Click on "KI gestütztes Formular generieren" to open a prompt where you can enter the text that you want to use as input for the form generator. The form generator will then generate the form fields based on the input text.
 You can also click on the microphone icon to use speech-to-text to enter the input text.
