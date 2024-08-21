@@ -1,36 +1,26 @@
-# An AI Form generator showcase 
+# AI Form Generator Showcase
 
-This is a showcase of a form generator that uses AI to generate forms. The form generator is library. The form generator uses the [GPT-4o-mini](https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/) model to generate the form fields based on the user input.
+This repository showcases an AI-powered form generator that leverages the [GPT-4o-mini](https://openai.com/index/gpt-4o-mini-advancing-cost-efficient-intelligence/) model from OpenAI to dynamically generate form fields based on user-provided input. The application is capable of filling out the forms by analyzing content from user-supplied files.
 
-In addition, the generated form can be filled by analyzing a file provided by the user. The form fields are filled based on the content of the file.
-
-The form generator can be used to generate forms for various purposes such as surveys, questionnaires, feedback forms, etc.
+The form generator is designed for various applications including surveys, questionnaires, and feedback forms among others.
 
 ## User Manual
 
-When you open the Demo you will e asked for a valid OpenAI Key, which is needed to use the GPT-4 model. You can get an API key from the OpenAI website.
-Because we run in a serverless environment, the key is not stored and you will need to provide it every time you run the demo.
+Upon launching the demo, users are prompted to enter a valid OpenAI API key, necessary for utilizing the GPT-4 model. API keys can be obtained directly from the OpenAI website. Due to the serverless nature of the environment, the key must be provided each time the demo is run.
 
+To initiate form generation, select "KI gestütztes Formular generieren" to input text that will serve as the basis for the form fields. Alternatively, the microphone icon allows for speech-to-text input.
 
-Click on "KI gestütztes Formular generieren" to open a prompt where you can enter the text that you want to use as input for the form generator. The form generator will then generate the form fields based on the input text.
-You can also click on the microphone icon to use speech-to-text to enter the input text.
+Once the "Submit" button is clicked, the form is generated and can be reviewed along with the JSON Schema produced by the AI based on the provided prompt. A token limit of 3000 has been set; however, adjustments to this limit can be made in the code to accommodate larger data schemas. Each form can be saved for later use by selecting "apply," facilitating the creation of nested forms and complex data structures.
 
+## Data Storage
 
-After clicking in "Submit" the form will be generated.
+As this is a live serverless demo, data is stored locally within the browser's storage. Closing the browser or clearing the cache will result in data loss. For permanent storage, users can download the Data and Schemata and save it on their device. Data can be restored at any time from the initial greeting screen.
 
-You can review the generated form and the JSON-Schema, that the AI has generated based on you prompt. Currently we have set a maxToken limit of 3000 tokens, which means that the AI will only generate 1000 tokens. If you want to generate more tokens, you can change the maxToken limit in the code.
-So don't expect huge data schemata to be generated at once. Nevertheless you can save each generated form by clicking "apply" and reuse that form later. This means you can nest forms and create complex data structures.
+## Utilizing the Generated Form
 
-## Where is my data stored?
+By selecting "Formular ersetzen" in the left sidebar, users can replace the current form with a new one or integrate additional forms through drag-and-drop, allowing for the creation of complex data structures.
 
-Because this is a serverless live Demo your data is only stored within the browsers local storage. This means that if you close the browser or clear the cache, your data will be lost. If you want to store your data permanently you can download the JSON-Schema and save it on your local machine.
-You can download and restore the data at any time using the initial greeting screen.
-
-## How can I use the generated form?
-
-When you click on "Formular ersetzen" in the Left Sidebar, you can replace the current form with a new one. You can also drag and drop into the current form to create a deeper nested form. This way you can create complex data structures.
-
-## Give me an example
+## Example
 
 ### Festival organization
 
