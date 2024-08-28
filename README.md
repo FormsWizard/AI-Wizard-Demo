@@ -4,6 +4,9 @@ This repository showcases an AI-powered form generator that leverages the [GPT-4
 
 The form generator is designed for various applications including surveys, questionnaires, and feedback forms among others.
 
+https://github.com/user-attachments/assets/9a59d392-cff4-4155-8af0-7e6f387600a4
+
+
 ## User Manual
 
 Upon launching the demo, users are prompted to enter a valid OpenAI API key, necessary for utilizing the GPT-4 model. API keys can be obtained directly from the OpenAI website. Due to the serverless nature of the environment, the key must be provided each time the demo is run.
@@ -26,7 +29,10 @@ By selecting "Formular ersetzen" in the left sidebar, users can replace the curr
 
 Prompt used for the example:
 ```
-All important form fields for the organization of a festival, including helpers, stuff, equipment, stages, location plan and so on... be very precise on the granularity of a stage and bar organization. 
+All important form fields for the organization of a festival, including helpe
+
+
+rs, stuff, equipment, stages, location plan and so on... be very precise on the granularity of a stage and bar organization. 
 ```
 
 <p align="center">
